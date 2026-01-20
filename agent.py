@@ -37,9 +37,7 @@ class Agent:
         return np.dot(dx, dx) <= radius**2
 
     def social_drift(self, other: "Agent", beta: float, R_sp: float) -> np.ndarray:
-        """Update social position based on another agent's position.
-        This is U
-        """
+        """Update social position U based on another agent's position."""
 
         if not self.within_social_radius(other, R_sp):
             return np.zeros_like(self.x)
@@ -53,9 +51,7 @@ class Agent:
         return beta * sign * self.social_distance(other)
 
     def opinion_drift(self, other: "Agent", alpha: float, R_op: float) -> np.ndarray:
-        """Update opinion vector based on another agent's opinion.
-        This is V
-        """
+        """Update opinion vector based V on another agent's opinion."""
 
         if not self.within_social_radius(other, R_op):
             return np.zeros_like(self.theta)
