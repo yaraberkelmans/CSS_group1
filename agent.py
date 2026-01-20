@@ -48,7 +48,7 @@ class Agent:
         else:
             sign = np.sign(sign)
 
-        return beta * sign * self.social_distance(other)
+        return beta * sign * (other.x - self.x)
 
     def opinion_drift(self, other: "Agent", alpha: float, R_op: float) -> np.ndarray:
         """Update opinion vector based V on another agent's opinion."""
