@@ -36,11 +36,6 @@ class AgentBasedModel:
         # create a list of N agents
         self.agents = [Agent(id=i, d=d, m=m) for i in range(N)]
         
-        # storage for history
-        num_steps = int(T / dt) + 1
-        self.history_x = np.zeros((num_steps, N, d))
-        self.history_theta = np.zeros((num_steps, N, m))
-        
         # initization
         self._initialize_agents()
 
@@ -49,40 +44,78 @@ class AgentBasedModel:
         for agent in self.agents:
             agent.x = np.random.uniform(-0.25, 0.25, size=self.d)   # social space [-0.25, 0.25]^2
             agent.theta = np.random.uniform(-1, 1, size=self.m)     # opinion space [-1, 1]
+ 
 
-    def compute_drifts(self):
+    def step(self, rng):
         """
-        Computes the deterministic drift components for all agents based on their current state.
-
-        Returns:
-            drift_x_all: The total social force vector for each agent.
-            drift_theta_all: The total opinion influence vector for each agent.
+        One Euler–Maruyama update of the system (updates self.agents).
         """
-        # initialize arrays
-        drift_x_all = np.zeros((self.N, self.d))
-        drift_theta_all = np.zeros((self.N, self.m))
+        N = len(self.agents)
+        if N == 0:
+            return
 
-        # iterate over all pairs of agents to compute interactions
-        for i, agent_i in enumerate(self.agents):
-            sum_drift_x = np.zeros(self.d)
-            sum_drift_theta = np.zeros(self.m)
+        d = self.agents[0].d
+        m = self.agents[0].m
 
-            for j, agent_j in enumerate(self.agents):
-                if i == j: 
+        dt = self.dt
+        alpha = self.alpha
+        beta = self.beta
+        R_op = self.R_op
+        R_sp = self.R_sp
+        sigma_op = self.sigma_op
+        sigma_sp = self.sigma_sp
+
+        # State at the beginning of the step
+        x_state = np.array([a.x for a in self.agents], dtype=float)
+        theta_state = np.array([a.theta for a in self.agents], dtype=float)
+
+        dx = np.zeros((N, d))
+        dtheta = np.zeros((N, m))
+
+        # Compute interaction effects
+        state = []
+        for i in range(N):
+            a = Agent(self.agents[i].id, d, m)
+            a.x = x_state[i].copy()
+            a.theta = theta_state[i].copy()
+            state.append(a)
+
+        # Compute drift
+        for i in range(N):
+            for j in range(N):
+                if j == i:
                     continue
-                
-                # social force (U) exerted by agent_j on agent_i
-                u_ij = agent_i.social_drift(agent_j, self.beta, self.R_sp)
-                
-                # opinion influence (V) exerted by agent_j on agent_i
-                v_ij = agent_i.opinion_drift(agent_j, self.alpha, self.R_op)
-                
-                # accumulate the interactions
-                sum_drift_x += u_ij
-                sum_drift_theta += v_ij
+                dx[i] += state[i].social_drift(state[j], beta, R_sp)
+                dtheta[i] += state[i].opinion_drift(state[j], alpha, R_op)
 
-            # divide by N
-            drift_x_all[i] = sum_drift_x / self.N
-            drift_theta_all[i] = sum_drift_theta / self.N
-            
-        return drift_x_all, drift_theta_all
+        # Euler–Maruyama update (noise and timestep)
+        dx = (dt / N) * dx + sigma_sp * np.sqrt(dt) * rng.normal(size=(N, d))
+        dtheta = (dt / N) * dtheta + sigma_op * np.sqrt(dt) * rng.normal(size=(N, m))
+
+        for i in range(N):
+            self.agents[i].x = x_state[i] + dx[i]
+            self.agents[i].theta = theta_state[i] + dtheta[i]
+
+    def run(self, seed=0, save_every=1):
+        """
+        Run the simulation and return agent states over time.
+        """
+        rng = np.random.default_rng(seed)
+        steps = int(self.T / self.dt)
+
+        x_over_time = []
+        theta_over_time = []
+
+        # Record initial state
+        x_over_time.append(np.array([a.x for a in self.agents], dtype=float))
+        theta_over_time.append(np.array([a.theta for a in self.agents], dtype=float))
+
+        for step in range(1, steps + 1):
+            self.step(rng)
+
+            # Record agent states at regular intervals
+            if step % save_every == 0:
+                x_over_time.append(np.array([a.x for a in self.agents], dtype=float))
+                theta_over_time.append(np.array([a.theta for a in self.agents], dtype=float))
+
+        return np.array(x_over_time), np.array(theta_over_time)
