@@ -29,7 +29,7 @@ class Agent:
 
     def social_distance(self, other: "Agent") -> float:
         """Compute the social distance between self and another agent."""
-        return np.linalg.norm(other.x - self.x)
+        return np.linalg.norm(self.x - other.x)
 
     def within_social_radius(self, other: "Agent", radius: float) -> bool:
         """Check if another agent is within a given social radius."""
