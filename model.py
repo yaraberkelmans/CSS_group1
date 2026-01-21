@@ -119,3 +119,25 @@ class AgentBasedModel:
                 )
 
         return np.array(x_over_time), np.array(theta_over_time)
+    
+    # ... (Previous __init__, _initialize_agents, compute_drifts code) ...
+
+    def adjacency_matrix(self):
+        """
+        Connects the network based on current agent positions.
+        """
+        adj_matrix = np.zeros((self.N, self.N), dtype=int)
+
+        # iterate through all pairs
+        for i in range(self.N):
+            for j in range(i + 1, self.N):
+                # to check condition ||x_i - x_j|| <= R_sp
+                if self.agents[i].within_social_radius(self.agents[j], self.R_sp):
+                    adj_matrix[i, j] = 1
+                    adj_matrix[j, i] = 1
+        
+        return adj_matrix
+
+    
+        
+        
