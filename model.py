@@ -138,6 +138,24 @@ class AgentBasedModel:
         
         return adj_matrix
 
-    
+    def global_assortativity(self):
+        """
+        Calculates the global assortativity coefficient 'r'.
+        """
+        # get the adjacency matrix
+        adj_matrix = self.adjacency_matrix()
         
+        # calculate degrees
+        degrees = np.sum(adj_matrix, axis=1)
+        total_degree = np.sum(degrees)
         
+        thetas = np.array([agent.theta[0] for agent in self.agents])
+        theta_bar = np.sum(degrees * thetas) / total_degree
+
+        denominator = np.sum(degrees * (thetas - theta_bar) ** 2)
+
+        row, col = np.where(adj_matrix == 1)
+        diffs = thetas - theta_bar
+        numerator = np.sum(diffs[row] * diffs[col])
+
+        return numerator / denominator if denominator != 0 else 0.0
