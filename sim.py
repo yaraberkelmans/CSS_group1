@@ -1,27 +1,48 @@
 from model import AgentBasedModel
-from plot import plot_agents
+from plot import plot_snapshot
 
 import numpy as np
 
 
-def run_simulation():
-    model = AgentBasedModel()
-    x_over_time, theta_over_time = model.run(seed=0, save_every=10)
+def run_experiment(case_name: str, savepath: str = None) -> None:
 
-    return x_over_time, theta_over_time
+    print(f"--- Running Experiment: {case_name} ---")
+
+    if case_name == "Fig 1a":
+        params = {"alpha": 40.0, "beta": 10.0}
+    elif case_name == "Fig 1b":
+        params = {"alpha": 40.0, "beta": 40.0}
+    elif case_name == "Fig 2a":
+        params = {"alpha": 10.0, "beta": 50.0}
+    elif case_name == "Fig 2b":
+        params = {"alpha": 100.0, "beta": 50.0}
+    else:
+        print("Unknown case")
+        return
+
+    model = AgentBasedModel(
+        N=100,
+        T=2.5,
+        dt=0.01,
+        R_sp=0.15,
+        R_op=0.15,
+        sigma_sp=0.05,
+        sigma_op=0.05,
+        **params,
+    )
+
+    seed = np.random.randint(10000)
+    model.run(seed=seed)
+
+    plot_snapshot(
+        model,
+        title=f"{case_name} (α={params['alpha']}, β={params['beta']})",
+        savepath=savepath,
+    )
 
 
 if __name__ == "__main__":
-
-    iterations = 2
-    xss = []
-    thetass = []
-    for i in range(iterations):
-        xs, thetas = run_simulation()
-        xss.append(xs[-1])
-        thetass.append(thetas[-1])
-
-    xs = np.mean(xss, axis=0)
-    thetas = np.mean(thetass, axis=0)
-
-    plot_agents(xs, thetas, title="Final Agent Positions and Opinions")
+    run_experiment("Fig 1a", savepath="img/fig1a.png")
+    # run_experiment("Fig 1b")
+    # run_experiment("Fig 2a")
+    # run_experiment("Fig 2b")
