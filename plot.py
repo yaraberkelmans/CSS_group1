@@ -106,3 +106,41 @@ def plot_snapshot_with_edges(
     plt.show()
     if savepath is not None:
         fig.savefig(savepath, dpi=300)
+
+
+def plot_hysteresis(
+    R_values: np.ndarray,
+    assortativity_forward: list[float],
+    assortativity_backward: list[float],
+    savepath: str = None,
+) -> None:
+    """
+    Plot hysteresis curve of assortativity vs R_sp and R_op.
+    """
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    ax.plot(
+        R_values,
+        assortativity_forward,
+        marker="o",
+        label="Increasing R",
+        color="blue",
+    )
+    ax.plot(
+        R_values,
+        assortativity_backward,
+        marker="s",
+        label="Decreasing R",
+        color="red",
+    )
+
+    ax.set_xlabel("Social and Opinion Radius (R_sp = R_op)")
+    ax.set_ylabel("Assortativity Measure")
+    ax.set_title("Hysteresis in Assortativity vs Social/Opinion Radius")
+    ax.legend()
+    ax.grid(True, linestyle="--", alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+    if savepath is not None:
+        fig.savefig(savepath, dpi=300)

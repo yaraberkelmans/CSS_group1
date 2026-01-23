@@ -56,53 +56,57 @@ class AgentBasedModel:
             agent.theta = rng.uniform(-1, 1, size=self.m)  # opinion space [-1, 1]
 
     def step(self, rng: np.random.Generator) -> None:
-        """
-        One Euler–Maruyama update of the system (updates self.agents).
-        """
-        N = len(self.agents)
+        """Performs a single time step update for all agents."""
+
+        N = self.N
         if N == 0:
             return
 
-        d = self.agents[0].d
-        m = self.agents[0].m
-
+        # copy to local variable for quicker access
         dt = self.dt
         alpha = self.alpha
         beta = self.beta
-        R_op = self.R_op
-        R_sp = self.R_sp
+        R_op2 = self.R_op * self.R_op
+        R_sp2 = self.R_sp * self.R_sp
         sigma_op = self.sigma_op
         sigma_sp = self.sigma_sp
 
-        # State at the beginning of the step
-        x_state = np.array([a.x for a in self.agents], dtype=float)
-        theta_state = np.array([a.theta for a in self.agents], dtype=float)
+        # stack state into arrays
+        X = np.array([a.x for a in self.agents], dtype=float)  # (N, d)
+        Theta = np.array([a.theta for a in self.agents], dtype=float)  # (N, m)
 
-        dx = np.zeros((N, d))
-        dtheta = np.zeros((N, m))
+        # adjacency (float so we can multiply)
+        A_sp, A_op = self.adjacency_matrix()
+        A_sp = A_sp.astype(float)
+        A_op = A_op.astype(float)
 
-        # Compute drift
-        for i in range(N):
-            for j in range(N):
-                if j == i:
-                    continue
-                dx[i] += self.agents[i].social_drift(self.agents[j], beta, R_sp)
-                dtheta[i] += self.agents[i].opinion_drift(self.agents[j], alpha, R_op)
+        # social opinion sign
+        dots = Theta @ Theta.T  # (N, N)
+        S = np.sign(dots)
+        S[np.abs(dots) < 1e-10] = 0.0
 
-        # Euler–Maruyama update (noise and timestep)
-        dx = (dt / N) * dx + sigma_sp * np.sqrt(dt) * rng.normal(
-            size=(N, d), loc=0.0, scale=1.0
+        # pairwise differences
+        dX = X[None, :, :] - X[:, None, :]  # (N, N, d) = x_j - x_i
+        dTheta = Theta[None, :, :] - Theta[:, None, :]  # (N, N, m)
+
+        # drifts
+        drift_x = beta * ((A_sp * S)[:, :, None] * dX).sum(axis=1)  # (N, d)
+        drift_theta = alpha * (A_op[:, :, None] * dTheta).sum(axis=1)  # (N, m)
+
+        # Euler–Maruyama update
+        dx = (dt / N) * drift_x + sigma_sp * np.sqrt(dt) * rng.normal(size=X.shape)
+        dtheta = (dt / N) * drift_theta + sigma_op * np.sqrt(dt) * rng.normal(
+            size=Theta.shape
         )
-        dtheta = (dt / N) * dtheta + sigma_op * np.sqrt(dt) * rng.normal(
-            size=(N, m), loc=0.0, scale=1.0
-        )
 
-        for i in range(N):
-            self.agents[i].x += dx[i]
-            self.agents[i].theta += dtheta[i]
-            self.agents[i].reflect(low=-0.3, high=0.3)
+        # update agents
+        for i, a in enumerate(self.agents):
+            a.x = X[i] + dx[i]
+            a.theta = Theta[i] + dtheta[i]
+            # reflect at boundaries
+            a.reflect(low=-0.3, high=0.3)
 
-    def run(self, seed: int = 0, save_every: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    def run(self, save_every: int = 1) -> tuple[np.ndarray, np.ndarray]:
         """
         Run the simulation and return agent states over time.
         """
