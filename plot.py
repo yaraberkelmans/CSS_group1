@@ -105,4 +105,3 @@ def plot_snapshot_with_edges(
     plt.tight_layout()
     if savepath is not None:
         fig.savefig(savepath, dpi=300)
-    plt.show()

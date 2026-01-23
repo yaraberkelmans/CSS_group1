@@ -34,7 +34,7 @@ class Agent:
     def within_social_radius(self, other: "Agent", radius: float) -> bool:
         """Check if another agent is within a given social radius."""
         dx = self.x - other.x
-        return np.dot(dx, dx) <= radius**2
+        return bool(np.dot(dx, dx) <= radius**2)
 
     def social_drift(self, other: "Agent", beta: float, R_sp: float) -> np.ndarray:
         """Update social position U based on another agent's position."""
@@ -42,11 +42,7 @@ class Agent:
         if not self.within_social_radius(other, R_sp):
             return np.zeros_like(self.x)
 
-        sign = float(self.theta @ other.theta)
-        if abs(sign) < 1e-10:
-            sign = 0.0
-        else:
-            sign = np.sign(sign)
+        sign = np.sign(float(self.theta @ other.theta))
 
         return beta * sign * (other.x - self.x)
 
