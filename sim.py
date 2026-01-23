@@ -1,5 +1,5 @@
 from model import AgentBasedModel
-from plot import plot_snapshot, plot_snapshot_with_edges 
+from plot import plot_snapshot, plot_snapshot_with_edges
 import numpy as np
 
 
@@ -49,10 +49,9 @@ def run_experiment(case_name: str, savepath: str = None) -> None:
         )
 
 
-
 if __name__ == "__main__":
-    run_experiment("Fig 1a", savepath="img/fig1a.png")
+    # run_experiment("Fig 1a", savepath="img/fig1a.png")
     # run_experiment("Fig 1b")
     # run_experiment("Fig 2a")
     # run_experiment("Fig 2b")
-    # run_experiment("Fig 3a")
+    run_experiment("Fig 3a")

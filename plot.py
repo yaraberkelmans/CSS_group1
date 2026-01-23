@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from model import AgentBasedModel
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
 def plot_snapshot(model: "AgentBasedModel", title: str, savepath: str = None) -> None:
@@ -51,14 +50,16 @@ def plot_snapshot(model: "AgentBasedModel", title: str, savepath: str = None) ->
         fig.savefig(savepath, dpi=300)
 
 
-def plot_snapshot_with_edges(model: "AgentBasedModel", title: str, savepath: str = None) -> None:
+def plot_snapshot_with_edges(
+    model: "AgentBasedModel", title: str, savepath: str = None
+) -> None:
     """
     plot agents + network edges from adjacency matrix.
     """
     final_x = np.array([a.x for a in model.agents])
     final_theta = np.array([a.theta[0] for a in model.agents])
 
-    A = model.adjacency_matrix() 
+    A_sp, A_op = model.adjacency_matrix()
 
     fig, ax = plt.subplots(figsize=(7, 7))
 
@@ -66,7 +67,7 @@ def plot_snapshot_with_edges(model: "AgentBasedModel", title: str, savepath: str
     N = model.N
     for i in range(N):
         for j in range(i + 1, N):
-            if A[i, j] == 1:
+            if A_sp[i, j] == 1:
                 ax.plot(
                     [final_x[i, 0], final_x[j, 0]],
                     [final_x[i, 1], final_x[j, 1]],
@@ -105,4 +106,3 @@ def plot_snapshot_with_edges(model: "AgentBasedModel", title: str, savepath: str
     if savepath is not None:
         fig.savefig(savepath, dpi=300)
     plt.show()
-

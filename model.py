@@ -52,7 +52,7 @@ class AgentBasedModel:
             )  # social space [-0.25, 0.25]^2
             agent.theta = np.random.uniform(-1, 1, size=self.m)  # opinion space [-1, 1]
 
-    def step(self, rng):
+    def step(self, rng: np.random.Generator) -> None:
         """
         One Euler–Maruyama update of the system (updates self.agents).
         """
@@ -94,7 +94,7 @@ class AgentBasedModel:
             self.agents[i].x += dx[i]
             self.agents[i].theta += dtheta[i]
 
-    def run(self, seed=0, save_every=1):
+    def run(self, seed: int = 0, save_every: int = 1) -> tuple[np.ndarray, np.ndarray]:
         """
         Run the simulation and return agent states over time.
         """
@@ -119,42 +119,44 @@ class AgentBasedModel:
                 )
 
         return np.array(x_over_time), np.array(theta_over_time)
-    
-    # ... (Previous __init__, _initialize_agents, compute_drifts code) ...
 
-    def adjacency_matrix(self):
+    def adjacency_matrix(self) -> tuple[np.ndarray, np.ndarray]:
         """
-        Connects the network based on current agent positions.
+        Calculates adjacency matrices for social and opinion spaces
         """
-        adj_matrix = np.zeros((self.N, self.N), dtype=int)
 
-        # iterate through all pairs
-        for i in range(self.N):
-            for j in range(i + 1, self.N):
-                # to check condition ||x_i - x_j|| <= R_sp
-                if self.agents[i].within_social_radius(self.agents[j], self.R_sp):
-                    adj_matrix[i, j] = 1
-                    adj_matrix[j, i] = 1
-        
-        return adj_matrix
+        # stack agent positions
+        X = np.array([agent.x for agent in self.agents])
+        # pairwse squared distances of shape (N, N, d)
+        D2 = ((X[:, None, :] - X[None, :, :]) ** 2).sum(axis=2)
 
-    def global_assortativity(self):
+        # create adjacency matrices based on distance thresholds
+        A_sp = (D2 <= self.R_sp**2).astype(int)
+        A_op = (D2 <= self.R_op**2).astype(int)
+
+        # self-distance is always zero
+        np.fill_diagonal(A_sp, 0)
+        np.fill_diagonal(A_op, 0)
+
+        return A_sp, A_op
+
+    def global_assortativity(self) -> float:
         """
         Calculates the global assortativity coefficient 'r'.
         """
         # get the adjacency matrix
-        adj_matrix = self.adjacency_matrix()
-        
+        adj_matrix_social, adj_matrix_opinion = self.adjacency_matrix()
+
         # calculate degrees
-        degrees = np.sum(adj_matrix, axis=1)
+        degrees = np.sum(adj_matrix_social, axis=1)
         total_degree = np.sum(degrees)
-        
+
         thetas = np.array([agent.theta[0] for agent in self.agents])
         theta_bar = np.sum(degrees * thetas) / total_degree
 
         denominator = np.sum(degrees * (thetas - theta_bar) ** 2)
 
-        row, col = np.where(adj_matrix == 1)
+        row, col = np.where(adj_matrix_social == 1)
         diffs = thetas - theta_bar
         numerator = np.sum(diffs[row] * diffs[col])
 
