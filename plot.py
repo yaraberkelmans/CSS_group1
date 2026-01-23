@@ -49,3 +49,60 @@ def plot_snapshot(model: "AgentBasedModel", title: str, savepath: str = None) ->
     plt.show()
     if savepath is not None:
         fig.savefig(savepath, dpi=300)
+
+
+def plot_snapshot_with_edges(model: "AgentBasedModel", title: str, savepath: str = None) -> None:
+    """
+    plot agents + network edges from adjacency matrix.
+    """
+    final_x = np.array([a.x for a in model.agents])
+    final_theta = np.array([a.theta[0] for a in model.agents])
+
+    A = model.adjacency_matrix() 
+
+    fig, ax = plt.subplots(figsize=(7, 7))
+
+    # draw edges
+    N = model.N
+    for i in range(N):
+        for j in range(i + 1, N):
+            if A[i, j] == 1:
+                ax.plot(
+                    [final_x[i, 0], final_x[j, 0]],
+                    [final_x[i, 1], final_x[j, 1]],
+                    linewidth=0.6,
+                    alpha=0.4,
+                    color="gray",
+                )
+
+    # draw nodes
+    sc = ax.scatter(
+        final_x[:, 0],
+        final_x[:, 1],
+        c=final_theta,
+        cmap="coolwarm",
+        vmin=-1,
+        vmax=1,
+        edgecolor="k",
+        s=60,
+        alpha=0.85,
+        zorder=3,
+    )
+
+    cbar = plt.colorbar(sc, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Opinion (Theta)")
+
+    ax.set_title(title, fontsize=14)
+    ax.set_xlabel("Social Space X")
+    ax.set_ylabel("Social Space Y")
+
+    ax.set_xlim(-0.3, 0.3)
+    ax.set_ylim(-0.3, 0.3)
+    ax.set_aspect("equal", adjustable="box")
+    ax.grid(True, linestyle="--", alpha=0.3)
+
+    plt.tight_layout()
+    if savepath is not None:
+        fig.savefig(savepath, dpi=300)
+    plt.show()
+
