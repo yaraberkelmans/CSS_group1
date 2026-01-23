@@ -100,6 +100,7 @@ class AgentBasedModel:
         for i in range(N):
             self.agents[i].x += dx[i]
             self.agents[i].theta += dtheta[i]
+            self.agents[i].reflect(low=-0.3, high=0.3)
 
     def run(self, seed: int = 0, save_every: int = 1) -> tuple[np.ndarray, np.ndarray]:
         """

@@ -53,3 +53,14 @@ class Agent:
             return np.zeros_like(self.theta)
 
         return alpha * (other.theta - self.theta)
+
+    def reflect(self, low: float, high: float) -> None:
+        """Reflect social position to stay within [low, high]."""
+        if self.x[0] < low:
+            self.x[0] = low + (low - self.x[0])
+        if self.x[0] > high:
+            self.x[0] = high - (self.x[0] - high)
+        if self.x[1] < low:
+            self.x[1] = low + (low - self.x[1])
+        if self.x[1] > high:
+            self.x[1] = high - (self.x[1] - high)
