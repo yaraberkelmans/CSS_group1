@@ -51,62 +51,46 @@ def run_experiment(case_name: str, savepath: str = None) -> None:
         )
 
 
-def run_hysteresis_experiment():
-    """Vary R_sp and R_op to observe hysteresis in assortativity measure."""
-
-    # sweep R_sp and R_op from low to high and back
-    R_values = np.linspace(0.05, 0.3, 10)
-    assortativity_forward = []
-    assortativity_backward = []
+def run_find_polarised_r() -> None:
     seed = np.random.randint(10000)
-    # Forward sweep
-    for R in R_values:
-        model = AgentBasedModel(
-            N=100,
-            T=2.5,
-            dt=0.01,
-            R_sp=R,
-            R_op=R,
-            sigma_sp=0.05,
-            sigma_op=0.05,
-            seed=seed,
-            alpha=40.0,
-            beta=10.0,
-        )
-        model.run()
-        assortativity = model.global_assortativity()
-        assortativity_forward.append(assortativity)
-    # Backward sweep
-    for R in reversed(R_values):
-        model = AgentBasedModel(
-            N=100,
-            T=2.5,
-            dt=0.01,
-            R_sp=R,
-            R_op=R,
-            sigma_sp=0.05,
-            sigma_op=0.05,
-            seed=seed,
-            alpha=40.0,
-            beta=10.0,
-        )
-        model.run()
-        assortativity = model.global_assortativity()
-        assortativity_backward.append(assortativity)
-    assortativity_backward.reverse()
 
-    # Plot results
-    plot_hysteresis(
-        R_values,
-        assortativity_forward,
-        assortativity_backward,
+    R_op_values = np.linspace(0.05, 0.2, 50)
+    polarisation_results = []
+
+    for R_op in R_op_values:
+
+        model = AgentBasedModel(
+            N=100,
+            T=2.5,
+            dt=0.01,
+            R_sp=0.15,
+            R_op=R_op,
+            sigma_sp=0.05,
+            sigma_op=0.05,
+            seed=seed,
+            alpha=40.0,
+            beta=10.0,
+        )
+
+        model.run()
+        cross_cutt = model.cross_cutting_edge_fraction()
+        assortativity = model.global_assortativity()
+        opinion_var = model.opinion_variance()
+        polarisation_results.append(
+            np.array([R_op, cross_cutt, assortativity, opinion_var])
+        )
+
+    polarisation_results = np.array(polarisation_results)
+    plot_polarisation_vs_Rop(
+        polarisation_results, savepath="img/polarisation_vs_Rop.png"
     )
 
 
 if __name__ == "__main__":
     # run_experiment("Fig 1a", savepath="img/fig1a.png")
     # run_experiment("Fig 1b")
-    run_experiment("Fig 2a")
+    # run_experiment("Fig 2a")
     # run_experiment("Fig 2b")
     # run_experiment("Fig 3a")
     # run_hysteresis_experiment()
+    run_find_polarised_r()

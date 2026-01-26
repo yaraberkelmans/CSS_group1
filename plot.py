@@ -108,38 +108,33 @@ def plot_snapshot_with_edges(
         fig.savefig(savepath, dpi=300)
 
 
-def plot_hysteresis(
-    R_values: np.ndarray,
-    assortativity_forward: list[float],
-    assortativity_backward: list[float],
+def plot_polarisation_vs_Rop(
+    polarisation_values: np.ndarray,
     savepath: str = None,
 ) -> None:
-    """
-    Plot hysteresis curve of assortativity vs R_sp and R_op.
-    """
-    fig, ax = plt.subplots(figsize=(8, 6))
+    """Creates multiple plots of cross_cutting_fraction, global_assortativity, opinion_variance vs R_op values"""
 
-    ax.plot(
-        R_values,
-        assortativity_forward,
-        marker="o",
-        label="Increasing R",
-        color="blue",
-    )
-    ax.plot(
-        R_values,
-        assortativity_backward,
-        marker="s",
-        label="Decreasing R",
-        color="red",
-    )
+    fig, axs = plt.subplots(3, 1, figsize=(8, 12))
 
-    ax.set_xlabel("Social and Opinion Radius (R_sp = R_op)")
-    ax.set_ylabel("Assortativity Measure")
-    ax.set_title("Hysteresis in Assortativity vs Social/Opinion Radius")
-    ax.legend()
-    ax.grid(True, linestyle="--", alpha=0.3)
+    R_op_values = polarisation_values[:, 0]
 
+    axs[0].plot(R_op_values, polarisation_values[:, 1], marker="o", color="blue")
+    axs[0].set_title("Cross-Cutting Edge Fraction vs R_op")
+    axs[0].set_xlabel("R_op")
+    axs[0].set_ylabel("Cross-Cutting Edge Fraction")
+    axs[0].grid(True, linestyle="--", alpha=0.3)
+
+    axs[1].plot(R_op_values, polarisation_values[:, 2], marker="o", color="green")
+    axs[1].set_title("Global Assortativity vs R_op")
+    axs[1].set_xlabel("R_op")
+    axs[1].set_ylabel("Global Assortativity")
+    axs[1].grid(True, linestyle="--", alpha=0.3)
+
+    axs[2].plot(R_op_values, polarisation_values[:, 3], marker="o", color="red")
+    axs[2].set_title("Opinion Variance vs R_op")
+    axs[2].set_xlabel("R_op")
+    axs[2].set_ylabel("Opinion Variance")
+    axs[2].grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     plt.show()
     if savepath is not None:

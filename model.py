@@ -173,3 +173,41 @@ class AgentBasedModel:
         numerator = np.sum(diffs[row] * diffs[col])
 
         return numerator / denominator if denominator != 0 else 0.0
+
+    def cross_cutting_edge_fraction(
+        self, eps: float = 1e-10, exclude_neutral: bool = False
+    ) -> float:
+        """Calculates the fraction of cross-cutting edges in the social network."""
+        A_sp, _ = self.adjacency_matrix()
+        thetas = np.array([agent.theta[0] for agent in self.agents], dtype=float)
+
+        # consider each undirected edge once
+        iu = np.triu_indices_from(A_sp, k=1)
+        edges = A_sp[iu] == 1
+        if not edges.any():
+            return 0.0
+
+        ti = thetas[iu[0]]
+        tj = thetas[iu[1]]
+
+        if exclude_neutral:
+            neutral = (np.abs(ti) < eps) | (np.abs(tj) < eps)
+            edges = edges & (~neutral)
+            if not edges.any():
+                return 0.0
+            ti = ti[edges]
+            tj = tj[edges]
+            return np.mean(ti * tj < 0)
+
+        # include neutral in denominator, but they won't count as cross-cutting
+        return np.mean((ti[edges] * tj[edges]) < 0)
+
+    def mean_spatial_degree(self) -> float:
+        """Calculates the mean spatial degree of the social network."""
+        A_sp, _ = self.adjacency_matrix()
+        return A_sp.sum() / self.N
+
+    def opinion_variance(self) -> float:
+        """Calculates the variance of opinions among agents."""
+        thetas = np.array([agent.theta[0] for agent in self.agents], dtype=float)
+        return np.var(thetas)
