@@ -1,4 +1,5 @@
 from model import AgentBasedModel
+from analysis import hdbscan_cluster_labels_xytheta, count_big_hdbscan_clusters
 from plot import *
 import numpy as np
 
@@ -76,8 +77,11 @@ def run_find_polarised_r() -> None:
         cross_cutt = model.cross_cutting_edge_fraction()
         assortativity = model.global_assortativity()
         opinion_var = model.opinion_variance()
+        labels = hdbscan_cluster_labels_xytheta(model, theta_scale=1.0)
+        n_big, size_by_id = count_big_hdbscan_clusters(labels, min_size=10)
+
         polarisation_results.append(
-            np.array([R_op, cross_cutt, assortativity, opinion_var])
+            np.array([R_op, cross_cutt, assortativity, opinion_var, n_big])
         )
 
     polarisation_results = np.array(polarisation_results)

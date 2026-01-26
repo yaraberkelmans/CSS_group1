@@ -114,7 +114,7 @@ def plot_polarisation_vs_Rop(
 ) -> None:
     """Creates multiple plots of cross_cutting_fraction, global_assortativity, opinion_variance vs R_op values"""
 
-    fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+    fig, axs = plt.subplots(4, 1, figsize=(8, 12))
 
     R_op_values = polarisation_values[:, 0]
 
@@ -135,6 +135,13 @@ def plot_polarisation_vs_Rop(
     axs[2].set_xlabel("R_op")
     axs[2].set_ylabel("Opinion Variance")
     axs[2].grid(True, linestyle="--", alpha=0.3)
+
+    axs[3].plot(R_op_values, polarisation_values[:, 4], marker="o", color="purple")
+    axs[3].set_title("Number of Large Clusters vs R_op")
+    axs[3].set_xlabel("R_op")
+    axs[3].set_ylabel("Number of Large Clusters (size >= 10)")
+    axs[3].grid(True, linestyle="--", alpha=0.3)
+
     plt.tight_layout()
     plt.show()
     if savepath is not None:
