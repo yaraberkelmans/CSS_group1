@@ -6,6 +6,8 @@ from sklearn.preprocessing import StandardScaler
 def hdbscan_cluster_labels_xytheta(
     model, theta_scale=1.0, min_cluster_size=10, min_samples=None
 ):
+    """Perform HDBSCAN clustering on agents' social positions and opinions."""
+
     X = np.array([agent.x for agent in model.agents], dtype=float)  # shape (N, d)
     theta = np.array([agent.theta[0] for agent in model.agents], dtype=float).reshape(
         -1, 1
@@ -24,6 +26,8 @@ def hdbscan_cluster_labels_xytheta(
 
 
 def count_big_hdbscan_clusters(labels, min_size=10):
+    """Count number of big clusters and their sizes from HDBSCAN labels."""
+
     labels = np.asarray(labels)
     mask = labels >= 0
     if not mask.any():

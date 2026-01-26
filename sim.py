@@ -53,40 +53,52 @@ def run_experiment(case_name: str, savepath: str = None) -> None:
 
 
 def run_find_polarised_r() -> None:
-    seed = np.random.randint(10000)
+    """
+    R sweep to find porlarised regimes
+    """
+
+    runs = 30
 
     R_op_values = np.linspace(0.05, 0.2, 50)
-    polarisation_results = []
+    polarisation_resultss = []
 
-    for R_op in R_op_values:
+    for run in range(runs):
+        print(f"--- Hysteresis Experiment Run {run+1}/{runs} ---")
+        seed = np.random.randint(10000)
+        polarisation_results = []
 
-        model = AgentBasedModel(
-            N=100,
-            T=2.5,
-            dt=0.01,
-            R_sp=0.15,
-            R_op=R_op,
-            sigma_sp=0.05,
-            sigma_op=0.05,
-            seed=seed,
-            alpha=40.0,
-            beta=10.0,
-        )
+        for R_op in R_op_values:
 
-        model.run()
-        cross_cutt = model.cross_cutting_edge_fraction()
-        assortativity = model.global_assortativity()
-        opinion_var = model.opinion_variance()
-        labels = hdbscan_cluster_labels_xytheta(model, theta_scale=1.0)
-        n_big, size_by_id = count_big_hdbscan_clusters(labels, min_size=10)
+            model = AgentBasedModel(
+                N=100,
+                T=2.5,
+                dt=0.01,
+                R_sp=0.15,
+                R_op=R_op,
+                sigma_sp=0.05,
+                sigma_op=0.05,
+                seed=seed,
+                alpha=40.0,
+                beta=10.0,
+            )
 
-        polarisation_results.append(
-            np.array([R_op, cross_cutt, assortativity, opinion_var, n_big])
-        )
+            model.run()
+            cross_cutt = model.cross_cutting_edge_fraction()
+            assortativity = model.global_assortativity()
+            opinion_var = model.opinion_variance()
+            labels = hdbscan_cluster_labels_xytheta(model, theta_scale=1.0)
+            n_big, size_by_id = count_big_hdbscan_clusters(labels, min_size=10)
 
-    polarisation_results = np.array(polarisation_results)
+            polarisation_results.append(
+                np.array([R_op, cross_cutt, assortativity, opinion_var, n_big])
+            )
+
+        polarisation_results = np.array(polarisation_results)
+        polarisation_resultss.append(polarisation_results)
+
+    polarisation_resultss = np.array(polarisation_resultss)
     plot_polarisation_vs_Rop(
-        polarisation_results, savepath="img/polarisation_vs_Rop.png"
+        polarisation_resultss, savepath="img/polarisation_vs_Rop.png"
     )
 
 

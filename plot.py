@@ -115,32 +115,67 @@ def plot_polarisation_vs_Rop(
     """Creates multiple plots of cross_cutting_fraction, global_assortativity, opinion_variance vs R_op values"""
 
     fig, axs = plt.subplots(4, 1, figsize=(8, 12))
+    # polarisation values shape: (runs, len(R_op_values), 5)
+    polarisation_values_mean = np.mean(polarisation_values, axis=0)
+    R_op_values = polarisation_values_mean[:, 0]
 
-    R_op_values = polarisation_values[:, 0]
+    # variance across runs can also be plotted if desired
+    polarisation_std = np.std(polarisation_values, axis=0)
 
-    axs[0].plot(R_op_values, polarisation_values[:, 1], marker="o", color="blue")
+    # data
+    axs[0].plot(R_op_values, polarisation_values_mean[:, 1], color="blue")
+    # plot std as shaded area
+    axs[0].fill_between(
+        R_op_values,
+        polarisation_values_mean[:, 1] - polarisation_std[:, 1],
+        polarisation_values_mean[:, 1] + polarisation_std[:, 1],
+        color="blue",
+        alpha=0.2,
+    )
     axs[0].set_title("Cross-Cutting Edge Fraction vs R_op")
     axs[0].set_xlabel("R_op")
     axs[0].set_ylabel("Cross-Cutting Edge Fraction")
     axs[0].grid(True, linestyle="--", alpha=0.3)
 
-    axs[1].plot(R_op_values, polarisation_values[:, 2], marker="o", color="green")
+    axs[1].plot(R_op_values, polarisation_values_mean[:, 2], color="green")
+    axs[1].fill_between(
+        R_op_values,
+        polarisation_values_mean[:, 2] - polarisation_std[:, 2],
+        polarisation_values_mean[:, 2] + polarisation_std[:, 2],
+        color="green",
+        alpha=0.2,
+    )
     axs[1].set_title("Global Assortativity vs R_op")
     axs[1].set_xlabel("R_op")
     axs[1].set_ylabel("Global Assortativity")
     axs[1].grid(True, linestyle="--", alpha=0.3)
 
-    axs[2].plot(R_op_values, polarisation_values[:, 3], marker="o", color="red")
+    axs[2].plot(R_op_values, polarisation_values_mean[:, 3], color="red")
+    axs[2].fill_between(
+        R_op_values,
+        polarisation_values_mean[:, 3] - polarisation_std[:, 3],
+        polarisation_values_mean[:, 3] + polarisation_std[:, 3],
+        color="red",
+        alpha=0.2,
+    )
     axs[2].set_title("Opinion Variance vs R_op")
     axs[2].set_xlabel("R_op")
     axs[2].set_ylabel("Opinion Variance")
     axs[2].grid(True, linestyle="--", alpha=0.3)
 
-    axs[3].plot(R_op_values, polarisation_values[:, 4], marker="o", color="purple")
-    axs[3].set_title("Number of Large Clusters vs R_op")
+    axs[3].plot(R_op_values, polarisation_values_mean[:, 4].astype(int), color="purple")
+    axs[3].fill_between(
+        R_op_values,
+        polarisation_values_mean[:, 4].astype(int) - polarisation_std[:, 4],
+        polarisation_values_mean[:, 4].astype(int) + polarisation_std[:, 4],
+        color="purple",
+        alpha=0.2,
+    )
+    axs[3].set_title("# Large Clusters vs R_op")
     axs[3].set_xlabel("R_op")
-    axs[3].set_ylabel("Number of Large Clusters (size >= 10)")
+    axs[3].set_ylabel("# Large Clusters (>=10)")
     axs[3].grid(True, linestyle="--", alpha=0.3)
+    axs[3].set_ylim(bottom=0)
 
     plt.tight_layout()
     plt.show()
