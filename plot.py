@@ -181,3 +181,315 @@ def plot_polarisation_vs_Rop(
     plt.show()
     if savepath is not None:
         fig.savefig(savepath, dpi=300)
+
+
+def plot_depolarisation_vs_noise(
+    experiment_results: np.ndarray,
+    noise_range: np.ndarray = np.arange(0.01, 0.11, 0.01),
+    savepath: str = None,
+) -> None:
+    """Plot noise depolarisation experiment results."""
+
+    print(experiment_results.shape)
+    pre_treatment_assortativity = experiment_results[:, 0, :, 0]
+    pre_treatment_opinion_variance = experiment_results[:, 0, :, 1]
+    post_treatment_assortativity = experiment_results[:, 1, :, 0]
+    post_treatment_opinion_variance = experiment_results[:, 1, :, 1]
+
+    mean_pre_assort = np.mean(pre_treatment_assortativity, axis=0)
+    mean_post_assort = np.mean(post_treatment_assortativity, axis=0)
+    mean_pre_opvar = np.mean(pre_treatment_opinion_variance, axis=0)
+    mean_post_opvar = np.mean(post_treatment_opinion_variance, axis=0)
+
+    std_var_post_opvar = np.std(post_treatment_opinion_variance, axis=0)
+    std_var_post_assort = np.std(post_treatment_assortativity, axis=0)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(
+        noise_range,
+        mean_pre_assort,
+        label="Assortativity",
+        color="blue",
+        linestyle="--",
+    )
+    ax.plot(
+        noise_range,
+        mean_post_assort,
+        color="blue",
+    )
+    ax.fill_between(
+        noise_range,
+        mean_post_assort - std_var_post_assort,
+        mean_post_assort + std_var_post_assort,
+        color="blue",
+        alpha=0.2,
+    )
+
+    ax.set_xlabel("Depolarisation Noise (σ_op = σ_sp)")
+    ax.set_ylabel("Global Assortativity", color="darkblue")
+
+    # second y axis for opinion variance
+    ax2 = ax.twinx()
+    ax2.plot(
+        noise_range,
+        mean_pre_opvar,
+        label="Opinion Variance",
+        color="orange",
+        linestyle="--",
+    )
+    ax2.plot(
+        noise_range,
+        mean_post_opvar,
+        color="orange",
+    )
+    ax2.fill_between(
+        noise_range,
+        mean_post_opvar - std_var_post_opvar,
+        mean_post_opvar + std_var_post_opvar,
+        color="orange",
+        alpha=0.2,
+    )
+    ax2.set_ylabel("Opinion Variance", color="darkorange")
+    ax2.tick_params(axis="y", labelcolor="darkorange")
+
+    ax.set_title("Global Assortativity vs Depolarisation Noise")
+    ax.grid(True, linestyle="--", alpha=0.3)
+
+    # legends for both axes
+    lines, labels = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    # legend that shows dashed pre treatment, solid post treatment
+
+    ax.legend(lines + lines2, labels + labels2, loc="upper right")
+
+    plt.tight_layout()
+    plt.show()
+    if savepath is not None:
+        fig.savefig(savepath, dpi=300)
+
+
+def plot_depolarisation_vs_edge_removal(
+    experiment_results: np.ndarray,
+    ignore_fraction_range: np.ndarray = np.arange(0.0, 0.55, 0.05),
+    savepath: str = None,
+) -> None:
+    """Plot edge removal depolarisation experiment results."""
+
+    print(experiment_results.shape)
+    pre_treatment_assortativity = experiment_results[:, 0, :, 0]
+    pre_treatment_opinion_variance = experiment_results[:, 0, :, 1]
+    post_treatment_assortativity = experiment_results[:, 1, :, 0]
+
+    post_treatment_opinion_variance = experiment_results[:, 1, :, 1]
+    mean_pre_assort = np.mean(pre_treatment_assortativity, axis=0)
+    mean_post_assort = np.mean(post_treatment_assortativity, axis=0)
+    mean_pre_opvar = np.mean(pre_treatment_opinion_variance, axis=0)
+    mean_post_opvar = np.mean(post_treatment_opinion_variance, axis=0)
+    std_var_post_opvar = np.std(post_treatment_opinion_variance, axis=0)
+    std_var_post_assort = np.std(post_treatment_assortativity, axis=0)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(
+        ignore_fraction_range,
+        mean_pre_assort,
+        label="Assortativity",
+        color="blue",
+        linestyle="--",
+    )
+    ax.plot(
+        ignore_fraction_range,
+        mean_post_assort,
+        color="blue",
+    )
+    ax.fill_between(
+        ignore_fraction_range,
+        mean_post_assort - std_var_post_assort,
+        mean_post_assort + std_var_post_assort,
+        color="blue",
+        alpha=0.2,
+    )
+    ax.set_xlabel("Fraction of Ignored Edges")
+    ax.set_ylabel("Global Assortativity", color="darkblue")
+    # second y axis for opinion variance
+    ax2 = ax.twinx()
+    ax2.plot(
+        ignore_fraction_range,
+        mean_pre_opvar,
+        label="Opinion Variance",
+        color="orange",
+        linestyle="--",
+    )
+    ax2.plot(
+        ignore_fraction_range,
+        mean_post_opvar,
+        color="orange",
+    )
+    ax2.fill_between(
+        ignore_fraction_range,
+        mean_post_opvar - std_var_post_opvar,
+        mean_post_opvar + std_var_post_opvar,
+        color="orange",
+        alpha=0.2,
+    )
+    ax2.set_ylabel("Opinion Variance", color="darkorange")
+    ax2.tick_params(axis="y", labelcolor="darkorange")
+    ax.set_title("Global Assortativity vs Ignored Edge Fraction")
+    ax.grid(True, linestyle="--", alpha=0.3)
+    # legends for both axes
+    lines, labels = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    # legend that shows dashed pre treatment, solid post treatment
+    ax.legend(lines + lines2, labels + labels2, loc="upper right")
+    plt.tight_layout()
+    plt.show()
+    if savepath is not None:
+        fig.savefig(savepath, dpi=300)
+
+
+def plot_depolarisation_vs_edge_removal_individual_trajectories(
+    experiment_results: np.ndarray,
+    ignore_fraction_range: np.ndarray = np.arange(0.0, 0.55, 0.05),
+    savepath: str = None,
+) -> None:
+    """Plot edge removal depolarisation experiment results. Each trajecotry should have a different color."""
+
+    pre_treatment_assortativity = experiment_results[:, 0, :, 0]
+    pre_treatment_opinion_variance = experiment_results[:, 0, :, 1]
+    post_treatment_assortativity = experiment_results[:, 1, :, 0]
+    post_treatment_opinion_variance = experiment_results[:, 1, :, 1]
+
+    mean_pre_assort = np.mean(pre_treatment_assortativity, axis=0)
+    mean_post_assort = np.mean(post_treatment_assortativity, axis=0)
+    mean_pre_opvar = np.mean(pre_treatment_opinion_variance, axis=0)
+    mean_post_opvar = np.mean(post_treatment_opinion_variance, axis=0)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(
+        ignore_fraction_range,
+        mean_pre_assort,
+        label="Assortativity",
+        color="blue",
+        linestyle="--",
+    )
+    ax.plot(
+        ignore_fraction_range,
+        mean_post_assort,
+        color="blue",
+    )
+    # each trajectory with different color
+    for i, pre_assort in enumerate(pre_treatment_assortativity):
+        # colours from a colormap
+        color = plt.cm.viridis(i / len(pre_treatment_assortativity))
+
+        ax.plot(
+            ignore_fraction_range,
+            pre_assort,
+            color=color,
+            alpha=0.3,
+            ls="--",
+        )
+
+    for i, post_assort in enumerate(post_treatment_assortativity):
+        color = plt.cm.viridis(i / len(post_treatment_assortativity))
+        ax.plot(
+            ignore_fraction_range,
+            post_assort,
+            color=color,
+            alpha=0.3,
+        )
+
+    ax.set_xlabel("Fraction of Ignored Edges")
+    ax.set_ylabel("Global Assortativity", color="darkblue")
+    # second y axis for opinion variance
+    ax2 = ax.twinx()
+    ax2.plot(
+        ignore_fraction_range,
+        mean_pre_opvar,
+        label="Opinion Variance",
+        color="orange",
+        linestyle="--",
+    )
+    ax2.plot(
+        ignore_fraction_range,
+        mean_post_opvar,
+        color="orange",
+    )
+
+    # each trajectory with different color
+    for _, pre_opvar in enumerate(pre_treatment_opinion_variance):
+
+        # color from cmap
+        color = plt.cm.plasma(_, len(pre_treatment_opinion_variance))
+        ax2.plot(
+            ignore_fraction_range,
+            pre_opvar,
+            color=color,
+            ls="--",
+            alpha=0.3,
+        )
+
+    for _, post_opvar in enumerate(post_treatment_opinion_variance):
+        color = plt.cm.plasma(_, len(post_treatment_opinion_variance))
+        ax2.plot(
+            ignore_fraction_range,
+            post_opvar,
+            color=color,
+            alpha=0.3,
+        )
+
+    ax2.set_ylabel("Opinion Variance", color="darkorange")
+    ax2.tick_params(axis="y", labelcolor="darkorange")
+    ax.set_title("Global Assortativity vs Ignored Edge Fraction")
+    ax.grid(True, linestyle="--", alpha=0.3)
+    # legends for both axes
+    lines, labels = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    # legend that shows dashed pre treatment, solid post treatment
+    ax.legend(lines + lines2, labels + labels2, loc="upper right")
+    plt.tight_layout()
+    plt.show()
+    if savepath is not None:
+        fig.savefig(savepath, dpi=300)
+
+
+def plot_seed_dependence(
+    result: np.ndarray, seeds: np.ndarray, savepath: str = None
+) -> None:
+    """
+    Plot distributions of final global assortativity and opinion variance across seeds.
+    """
+    final_assortativities = result[:, 0]
+    final_opinion_variances = result[:, 1]
+    fig, axs = plt.subplots(1, 2, figsize=(10, 4))
+
+    axs[0].hist(
+        final_assortativities,
+        bins=15,
+        color="lightblue",
+        edgecolor="darkblue",
+        alpha=0.85,
+    )
+    axs[0].set_title("Assortativity")
+    axs[0].set_xlabel("Global Assortativity")
+    axs[0].set_ylabel("Count")
+
+    axs[1].hist(
+        final_opinion_variances,
+        bins=15,
+        color="lightcoral",
+        edgecolor="darkred",
+        alpha=0.85,
+    )
+    axs[1].set_title("Opinion Variance")
+    axs[1].set_xlabel("Opinion Variance")
+    axs[1].set_ylabel("Count")
+
+    fig.suptitle(
+        r"Distribution of Final States"
+        "\n"
+        r"($N=100, \alpha=40, \beta=10, \sigma=0.05$)",
+        fontsize=16,
+    )
+    fig.tight_layout()
+    plt.show()
+    if savepath is not None:
+        fig.savefig(savepath, dpi=300)

@@ -55,7 +55,7 @@ class AgentBasedModel:
             )  # social space [-0.25, 0.25]^2
             agent.theta = rng.uniform(-1, 1, size=self.m)  # opinion space [-1, 1]
 
-    def step(self, rng: np.random.Generator) -> None:
+    def step(self, rng: np.random.Generator, ignore_random_edges: float = 0) -> None:
         """Performs a single time step update for all agents."""
 
         N = self.N
@@ -79,6 +79,11 @@ class AgentBasedModel:
         A_sp, A_op = self.adjacency_matrix()
         A_sp = A_sp.astype(float)
         A_op = A_op.astype(float)
+
+        if ignore_random_edges > 0:
+            mask = rng.uniform(size=A_sp.shape) < ignore_random_edges
+            A_sp[mask] = 0.0
+            A_op[mask] = 0.0
 
         # social opinion sign
         dots = Theta @ Theta.T  # (N, N)
@@ -106,7 +111,9 @@ class AgentBasedModel:
             # reflect at boundaries
             a.reflect(low=-0.3, high=0.3)
 
-    def run(self, save_every: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    def run(
+        self, save_every: int = 1, ignore_random_edges: float = 0.0
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Run the simulation and return agent states over time.
         """
@@ -121,7 +128,7 @@ class AgentBasedModel:
         theta_over_time.append(np.array([a.theta for a in self.agents], dtype=float))
 
         for step in tqdm.tqdm(range(1, steps + 1)):
-            self.step(rng)
+            self.step(rng, ignore_random_edges=ignore_random_edges)
 
             # Record agent states at regular intervals
             if step % save_every == 0:
