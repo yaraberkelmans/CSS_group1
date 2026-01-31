@@ -257,6 +257,39 @@ def run_seed_dependence(savepath: str = None, n: int = 30) -> None:
     seeds = np.array(seeds)
     plot_seed_dependence(result, seeds, savepath=savepath)
 
+def run_fig3a_multiple_times(
+    times=(0.55, 1.2, 1.9, 3.4),
+    seed=None,
+    base_savepath="img/fig3a",
+):
+    params = {"alpha": 40.0, "beta": 10.0}
+
+    if seed is None:
+        seed = np.random.randint(10000)
+        print(f"Using seed: {seed}")
+
+    for t in times:
+        model = AgentBasedModel(
+            N=100,
+            T=t,
+            dt=0.01,
+            R_sp=0.15,
+            R_op=0.15,
+            sigma_sp=0.05,
+            sigma_op=0.05,
+            seed=seed,
+            **params,
+        )
+
+        model.run()
+
+        plot_snapshot_with_edges(
+            model,
+            title=f"Interaction network and opinions at T = {t}",
+            savepath=f"{base_savepath}_T{str(t).replace('.', 'p')}.png",
+        )
+
+
 
 if __name__ == "__main__":
     # run_experiment("Fig 1a", savepath="img/fig1a.png")
@@ -269,4 +302,6 @@ if __name__ == "__main__":
     # run_depolarisation_ignore_connections(
     #    savepath="img/depolarisation_vs_edge_removal.png"
     # )
-    run_seed_dependence(savepath="img/seed_dependence.png", n=500)
+    # run_seed_dependence(savepath="img/seed_dependence.png", n=500)
+    run_fig3a_multiple_times( times=(0.55, 1.2, 1.9, 3.4), seed=6836)
+
