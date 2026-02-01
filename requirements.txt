@@ -1,0 +1,6 @@
+numpy
+tqdm
+hdbscan
+scikit-learn
+pytest
+matplotlib

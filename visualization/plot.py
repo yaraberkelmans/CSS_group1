@@ -2,11 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import os
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src.model import AgentBasedModel
 
 
 def plot_snapshot(model: "AgentBasedModel", title: str, savepath: str = None) -> None:
+    """Plot a snapshot of the agents in social space with opinions as colors."""
 
     # get last theta values
     final_x = np.array([a.x for a in model.agents])
@@ -192,7 +194,6 @@ def plot_depolarisation_vs_noise(
 ) -> None:
     """Plot noise depolarisation experiment results."""
 
-    print(experiment_results.shape)
     pre_treatment_assortativity = experiment_results[:, 0, :, 0]
     pre_treatment_opinion_variance = experiment_results[:, 0, :, 1]
     post_treatment_assortativity = experiment_results[:, 1, :, 0]
@@ -495,3 +496,39 @@ def plot_seed_dependence(
     plt.show()
     if savepath is not None:
         fig.savefig(savepath, dpi=300)
+
+
+def plot_r5_from_dict(results, savepath=None):
+    """Plots sweep across noise sigma values."""
+
+    sigma = np.array(results["sigma_op"], dtype=float)
+    unique = np.unique(sigma)
+
+    def aggregate(key):
+        mean, std = [], []
+        for s in unique:
+            vals = np.array(results[key], dtype=float)[sigma == s]
+            mean.append(vals.mean())
+            std.append(vals.std())
+        return np.array(mean), np.array(std)
+
+    fig, axs = plt.subplots(4, 1, figsize=(7, 10), sharex=True)
+
+    for ax, key, label in zip(
+        axs,
+        ["cross_cutting", "assortativity", "variance", "n_big"],
+        ["Cross-cutting", "Assortativity", "Opinion variance", "# big clusters"],
+    ):
+        m, s = aggregate(key)
+        ax.plot(unique, m)
+        ax.fill_between(unique, m - s, m + s, alpha=0.2)
+        ax.set_ylabel(label)
+
+    axs[-1].set_xlabel("sigma_op")
+    plt.tight_layout()
+
+    # Save before showing
+    if savepath is not None:
+        plt.savefig(savepath, dpi=300, bbox_inches="tight")
+
+    plt.show()
