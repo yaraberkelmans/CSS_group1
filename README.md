@@ -27,6 +27,7 @@ The model explores how the "Opinion influence strength" ($\alpha$) and "Social i
 
 ```text
 ├── main.py             # Main file to run the experiments as shown in the presentation
+├── echochambers.pdf     # Presentation slide
 ├── src/                # Core simulation logic (Agent, Model, Metrics)
 ├── visualization/      # Plotting and animate
 ├── img/                # Generated png and gif
