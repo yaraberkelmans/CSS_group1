@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from model import AgentBasedModel
+from src.model import AgentBasedModel
 from analysis import hdbscan_cluster_labels_xytheta, count_big_hdbscan_clusters
 
 

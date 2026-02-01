@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
-
 import sim
-from agent import Agent
-from model import AgentBasedModel
+from src.agent import Agent
+from src.model import AgentBasedModel
 
 
 @pytest.fixture
