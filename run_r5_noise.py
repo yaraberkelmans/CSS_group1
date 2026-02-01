@@ -38,7 +38,7 @@ def run_r5_noise_sweep_dict(
             )
             m.run()
 
-            results["sigma_op"].append(sigma_op)
+            results["sigma_op"].append(float(sigma_op))
             results["cross_cutting"].append(m.cross_cutting_edge_fraction())
             results["assortativity"].append(m.global_assortativity())
             results["variance"].append(m.opinion_variance())
@@ -48,19 +48,20 @@ def run_r5_noise_sweep_dict(
                 theta_scale=theta_scale,
                 min_cluster_size=min_cluster_size,
             )
-            n_big, size_by_id = count_big_hdbscan_clusters(labels, min_size=min_size_big)
+            n_big, _ = count_big_hdbscan_clusters(labels, min_size=min_size_big)
             results["n_big"].append(n_big)
 
     return results
 
-def plot_r5_from_dict(results):
-    sigma = np.array(results["sigma_op"])
+
+def plot_r5_from_dict(results, savepath=None):
+    sigma = np.array(results["sigma_op"], dtype=float)
     unique = np.unique(sigma)
 
     def aggregate(key):
         mean, std = [], []
         for s in unique:
-            vals = np.array(results[key])[sigma == s]
+            vals = np.array(results[key], dtype=float)[sigma == s]
             mean.append(vals.mean())
             std.append(vals.std())
         return np.array(mean), np.array(std)
@@ -79,9 +80,16 @@ def plot_r5_from_dict(results):
 
     axs[-1].set_xlabel("sigma_op")
     plt.tight_layout()
+
+    # Save before showing
+    if savepath is not None:
+        plt.savefig(savepath, dpi=300, bbox_inches="tight")
+
     plt.show()
+
 
 if __name__ == "__main__":
     sigmas = np.linspace(0.0, 0.2, 21)
     results = run_r5_noise_sweep_dict(sigmas, runs=20)
-    plot_r5_from_dict(results)
+
+    plot_r5_from_dict(results, savepath="img/r5_noise_sweep.png")
