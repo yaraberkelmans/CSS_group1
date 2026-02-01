@@ -1,5 +1,5 @@
 from random import seed
-from model import AgentBasedModel
+from src.model import AgentBasedModel
 from analysis import hdbscan_cluster_labels_xytheta, count_big_hdbscan_clusters
 from visualization.plot import *
 import numpy as np
