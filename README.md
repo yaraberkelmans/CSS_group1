@@ -18,9 +18,9 @@ The model explores how the "Opinion influence strength" ($\alpha$) and "Social i
 * **Dual-Threshold**: 
     * $R_{sp}$: Spatial visibility radius.
     * $R_{op}$: Opinion tolerance radius.
-* **Speed of Dynamics**
+* **Speed of Dynamics**:
     Explicit control over **Opinion Influence ($\alpha$)** and **Social Sorting ($\beta$)**. This allows the study of how different parameters accelerates polarization.
-* **Stochastic Perturbation**
+* **Stochastic Perturbation**:
     Integrates Gaussian noise ($\sigma$) into both opinion and spatial updates to simulate real-world entropy.
 
 ## 📂 Project Structure
