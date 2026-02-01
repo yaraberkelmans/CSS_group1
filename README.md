@@ -25,8 +25,6 @@ The model explores how the "Opinion influence strength" ($\alpha$) and "Social i
 - **Stochastic Perturbation**
   Integrates Gaussian noise ($\sigma$) into both opinion and spatial updates to simulate real-world entropy.
 
-## Results
-
 ## Experiments
 
 We reproduce a majority of the figures in the original paper, explore further pareamter sweeps across the model scope and additionally investigate the use of noise and edge removal as treatment for reverting a convergend opinion-social space state to a mixed opinion state.
